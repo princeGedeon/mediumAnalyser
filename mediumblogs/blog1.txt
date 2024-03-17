@@ -1,0 +1,129 @@
+Django is a high-level Python web framework that enables the rapid development of secure and maintainable web applications. The framework comes with a lot of built-in functionality, making it easy for developers to start creating web applications. In this blog, we’ll be creating a basic blog application using Django.
+
+To get started, we’ll need to install Django. The best way to do this is by using pip, the package installer for Python. To install Django, simply run the following command in your terminal:
+
+pip install django
+Next, let’s create a new Django project by running the following command in the terminal:
+
+django-admin startproject blog
+This will create a new directory named blog that contains the basic structure of a Django project.
+
+Next, we’ll create a new Django app within the project. An app is a self-contained module that can be plugged into a Django project.
+To create a new app, run the following command in the terminal:
+
+python manage.py startapp blog_app
+This will create a new directory named blog_app that contains the basic structure of a Django app.
+
+Now we need to add this blog_app into our project. Open settings.py file in the blog folder and add "blog_app" into INSTALLED_APPS , as shown in the code below:
+
+INSTALLED_APPS =
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "blog_app",
+]
+Next, we’ll create a model for our blog posts. A model is a Python class that defines the structure of an object in the database. To create a model, open the models.py file in the blog_app directory and add the following code:
+
+from django.db import models
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    pub_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+This creates a model named Post that has three fields: title, content, and pub_date. Here, the title field is a character field with a maximum length of 200 characters, the content field is a text field, and the pub_date field is a date-time field.
+
+Now to make changes to the database you need to run a few commands:
+
+python manage.py makemigrations
+This will create a query for to create the model structure in your database.
+
+python manage.py migrate
+And this will execute the designed queries to form tables in your database. Always remember to execute these commands whenever you make changes to the models.py file that might affect your database table schema.
+
+Next, we’ll be creating a form for creating new blog posts. A form is a Python class that defines the structure of a form on a web page. To create a form, open the forms.py file in the blog_app directory and add the following code:
+
+from django import forms
+from .models import Post
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['title', 'content']
+This creates a form named PostForm that is based on the Post model. The form contains two fields: title and content.
+
+Next, we’ll create a view for displaying the list of blog posts. A view is a Python function that returns a web page. To create a view, open the views.py file in the blog_app directory and add the following code:
+
+from django.shortcuts import render
+from .models import Post
+
+def post_list(request):
+    posts = Post.objects.all()
+    return render(request, 'blog_app/post_list.html', {'posts': posts})
+This creates a view named post_list that fetches all the blog posts from the database and passes them to the template post_list.html for rendering.
+
+Next, we’ll create the template for displaying the list of blog posts. A template is an HTML file that defines the layout of a web page. To create the template, create a new directory named templates within the blog_app directory and create a new file named post_list.html. Add the following code to the file:
+
+{% for post in posts %}
+<h2>{{ post.title }}</h2>
+<p>{{ post.content }}</p>
+<p>Published on {{ post.pub_date }}</p>
+{% endfor %}
+This template uses Django’s template language to loop through all the blog posts and display the title, content, and pub_date of each post.
+
+Next, we’ll create a view for creating a new blog post. To create the view, open the views.py file in the blog_app directory and add the following code:
+
+from django.shortcuts import render, redirect
+from .forms import PostForm
+
+def post_create(request):
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('post_list')
+    else:
+        form = PostForm()
+    return render(request, 'blog_app/post_form.html', {'form': form})
+This creates a view named post_create that handles both GET and POST requests. If the request method is POST, the view validates the form data and saves the new blog post to the database. If the request method is GET, the view renders a template that displays the form for creating a new blog post.
+
+Next, we’ll create the template for creating a new blog post. To create the template, create a new file named post_form.html within the templates directory and add the following code:
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value="Create">
+</form>
+This template uses Django’s template language to render the form for creating a new blog post. The {{ form.as_p }} tag renders the form as a series of paragraphs, each containing a label and an input field.
+
+Finally, we’ll create URLs for accessing the views. URLs define the mapping between web addresses and views. To create the URLs, open the urls.py file in the blog_app directory and add the following code:
+
+from django.urls import path
+from .views import post_list, post_create
+
+urlpatterns = [
+    path('', post_list, name='post_list'),
+    path('create/', post_create, name='post_create'),
+]
+This creates two URLs: one for displaying the list of blog posts and one for creating a new blog post. The name parameter specifies a unique name for each URL, which can be used to refer to the URL in other parts of the code.
+
+Next, we need to include the URLs of the blog_app in the main project URLs. To do this, open the urls.py file in the main project directory i.e. blogfolder and add the following code:
+
+from django.urls import include, path
+
+urlpatterns = [
+    path('', include('blog_app.urls')),
+]
+This code includes the URLs of the blog_app in the main project URLs. The empty path '' means that the blog posts will be displayed at the root URL of the site, i.e., http://localhost:8000/.
+
+To run the server, type the following command in the terminal:
+
+python manage.py runserver
+Visit http://localhost:8000/ in your web browser and you should see a list of blog posts. To add a new blog post, visit http://localhost:8000/create/ and fill in the form.
+
+In a nutshell, Django is a robust web framework that facilitates the development of sophisticated web applications. By adhering to the instructions provided in this guide, you can construct a basic blog application using Django. This is just the starting point, there is a multitude of additional capabilities and features you can integrate into your application. For further information, refer to the Django documentation and enjoy creating your own web applications.
