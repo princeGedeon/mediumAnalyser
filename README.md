@@ -1,4 +1,4 @@
-# README.md pour Medium Analyser avec Langchain
+# Medium Analyser avec Langchain
 
 ## Introduction
 
